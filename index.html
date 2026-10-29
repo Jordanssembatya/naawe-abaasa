@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-UG">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#102B46" />
+    <meta name="description" content="Explore, understand and compare health insurance options in Uganda in plain English. Prototype with demonstration data." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>AfyaGuide Uganda — Understand your health cover</title>
+    <style>
+      /* Boot loader: shown until React replaces the contents of #root. Inline because global.css arrives with the JS bundle. */
+      body { margin: 0; background: #f5f8fa; }
+      .boot-loader {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        color: #617184;
+        font-size: 0.875rem;
+      }
+      .boot-loader svg { width: 48px; height: 48px; animation: boot-pulse 1.4s ease-in-out infinite; }
+      .boot-loader noscript p { max-width: 22rem; margin: 0; padding: 0 1rem; text-align: center; color: #172b3a; }
+      @keyframes boot-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.92); } }
+      @media (prefers-reduced-motion: reduce) { .boot-loader svg { animation: none; } }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot-loader" role="status" aria-live="polite">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#102B46"/><path d="M16 7l8 3v6c0 5-3.4 8.4-8 9.6C11.4 24.4 8 21 8 16v-6l8-3z" fill="#087E8B"/><path d="M14.5 12h3v3h3v3h-3v3h-3v-3h-3v-3h3z" fill="#fff"/></svg>
+        <span>Loading AfyaGuide…</span>
+        <noscript><p>AfyaGuide needs JavaScript to run. Please enable it in your browser settings and reload the page.</p></noscript>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
