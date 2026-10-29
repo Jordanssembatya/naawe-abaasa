@@ -1,12 +1,14 @@
 import { Trash2 } from 'lucide-react';
 import { useId } from 'react';
 import { products } from '../../data/products';
+import { useI18n } from '../../i18n/I18nProvider';
 import { useCompare } from '../../state/CompareContext';
 import type { InsuranceProduct } from '../../types/product';
 
 /** Replace or remove one product in the comparison. */
 export function ProductSlotControls({ product }: { product: InsuranceProduct }) {
   const { ids, replace, remove } = useCompare();
+  const { t } = useI18n();
   const selectId = useId();
   const alternatives = products.filter((p) => !ids.includes(p.id));
 
@@ -15,7 +17,7 @@ export function ProductSlotControls({ product }: { product: InsuranceProduct }) 
       {alternatives.length > 0 && (
         <>
           <label htmlFor={selectId} className="visually-hidden">
-            Replace {product.name} with another product
+            {t('compare.replaceLabel', { name: product.name })}
           </label>
           <select
             id={selectId}
@@ -23,7 +25,7 @@ export function ProductSlotControls({ product }: { product: InsuranceProduct }) 
             value=""
             onChange={(e) => e.target.value && replace(product.id, e.target.value)}
           >
-            <option value="">Replace with…</option>
+            <option value="">{t('compare.replacePlaceholder')}</option>
             {alternatives.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -36,10 +38,10 @@ export function ProductSlotControls({ product }: { product: InsuranceProduct }) 
         type="button"
         className="button button--ghost button--sm"
         onClick={() => remove(product.id)}
-        aria-label={`Remove ${product.name}`}
+        aria-label={t('compare.removeLabel', { name: product.name })}
       >
         <Trash2 size={14} aria-hidden />
-        Remove
+        {t('compare.remove')}
       </button>
     </div>
   );

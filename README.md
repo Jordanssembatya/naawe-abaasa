@@ -1,4 +1,4 @@
-# AfyaGuide Uganda
+# InsurGuide
 
 A mobile-first prototype that helps people in Uganda discover, understand and compare health insurance in plain English, then prepare to enrol. Built for the Uganda Insurers Association (UIA) Simplified Health Insurance Access challenge.
 
@@ -34,6 +34,7 @@ npm run test:e2e     # browser tests at 360/390/768/1280px (builds and serves au
 | Errors | Not-found page for unknown routes and products; route error boundary |
 | Mobile app (PWA) | Installable from the browser: "Install app" card on Home (Chrome/Edge), Share → Add to Home Screen steps on iPhone/iPad. Opens full-screen with its own icon, with Products, Compare and Glossary shortcuts on a long press. Works offline after the first visit (the whole app and its data are cached by a service worker), with an "offline" notice |
 | App-style UI (under 1024px) | Bottom tab bar (Home, Products, Compare with a count, Glossary); app bar with Back and the page title on inner pages (Back goes up to the parent page when opened from a link); compact home screen; safe-area spacing for notched phones. Desktop keeps the website layout |
+| Languages | English, Luganda, Kiswahili and Runyankore, chosen from the globe selector in the header. The choice is saved on the device; the first visit follows the browser language. Interface, product records, glossary, notifications and page title are all translated; glossary terms also show the English word used in policy documents |
 
 ## Architecture
 
@@ -42,7 +43,9 @@ React 19 + TypeScript (strict) + Vite, React Router, Lucide icons, self-hosted I
 ```
 src/
   types/product.ts      Data model. null = "not specified" (never "none" or "unlimited")
-  data/                 products.ts (demo records), glossary.ts, labels.ts
+  data/                 products.ts (demo records), glossary.ts, labels.ts (English source data)
+  i18n/                 config.ts (languages), messages/<lang>.ts (UI text),
+                        content/<lang>.ts (product and glossary translations), I18nProvider
   lib/                  Pure logic: catalogue filters/sort, comparison rows, checklist,
                         missing-field detection, formatting, safe localStorage
   state/                CompareContext (selection, max 3, persisted), ToastContext,
@@ -55,7 +58,8 @@ e2e/                    Playwright tests
 ```
 
 - **Adding a product** only needs a new record in `src/data/products.ts`; every view reads from the data.
-- **Comparison fields** are defined once in `src/lib/compare.ts` (`compareRows`). The table and the mobile view both render from it, so every product is compared on the same fields.
+- **Translations.** `src/i18n/messages/en.ts` is the source catalog; every other language must have exactly the same keys (TypeScript fails the build otherwise) and the same `{placeholders}` (checked by `src/i18n/i18n.test.tsx`). Product and glossary text is translated in `src/i18n/content/<lang>.ts`, item by item against the English records, which stay the source for filtering and sorting. The tests also render every page in every language and fail if any English text is left. To add a language: add it to `LOCALES` in `src/i18n/config.ts`, copy `messages/en.ts` and a `content/` file, register both, and add its loading text to the script in `index.html`. The Luganda, Kiswahili and Runyankore text needs review by native speakers before real use.
+- **Comparison fields** are defined once in `src/lib/compare.ts` (`getCompareRows`). The table and the mobile view both render from it, so every product is compared on the same fields.
 - **Contact routes** are a tagged union. `verified` routes render real `tel:`, `mailto:` and website buttons. `unverified` routes render an explanation and never a link. All demo products are `unverified`.
 
 ### Visual design
@@ -71,7 +75,7 @@ The colour palette follows the brief: navy `#102B46`, teal `#087E8B`, amber for 
 - an inset call-to-action panel
 - a light multi-column footer
 
-AfyaGuide's own name, logo and content are used throughout. Nothing was copied from that site's branding, images or text.
+InsurGuide's own name, logo and content are used throughout. Nothing was copied from that site's branding, images or text.
 
 ## Tests and results (run on 29 Oct 2026)
 

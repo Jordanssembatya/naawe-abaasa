@@ -9,7 +9,7 @@ import type { ContactRoute, InsuranceProduct } from '../types/product';
  */
 
 const DEMO_SOURCE_NOTE =
-  'Fictional record created for the AfyaGuide prototype. It does not describe a real product, and all amounts are illustrative.';
+  'Fictional record created for the InsurGuide prototype. It does not describe a real product, and all amounts are illustrative.';
 
 const UNVERIFIED_CONTACT: ContactRoute = {
   status: 'unverified',

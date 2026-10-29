@@ -3,17 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { routes } from '../routes';
-import { CompareProvider } from '../state/CompareContext';
-import { ToastProvider } from '../state/ToastContext';
+import { AppProviders } from '../AppProviders';
 
 function renderApp(path = '/') {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   render(
-    <ToastProvider>
-      <CompareProvider>
-        <RouterProvider router={router} />
-      </CompareProvider>
-    </ToastProvider>,
+    <AppProviders>
+      <RouterProvider router={router} />
+    </AppProviders>,
   );
   return router;
 }

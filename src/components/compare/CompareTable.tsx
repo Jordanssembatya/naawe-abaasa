@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
-import { compareRows, rowDiffers } from '../../lib/compare';
+import { useI18n } from '../../i18n/I18nProvider';
+import { getCompareRows, rowDiffers } from '../../lib/compare';
 import type { InsuranceProduct } from '../../types/product';
 import { Term } from '../glossary/Term';
 import { CompareCellView } from './CompareCellView';
@@ -16,15 +17,16 @@ function RowLabel({ label, glossaryId }: { label: string; glossaryId?: string })
 
 /** Side-by-side table for tablet and desktop. The first column stays visible while scrolling. */
 export function CompareTable({ items, differencesOnly }: CompareViewProps) {
-  const rows = compareRows.filter((row) => !differencesOnly || rowDiffers(row, items));
+  const { t } = useI18n();
+  const rows = getCompareRows(t).filter((row) => !differencesOnly || rowDiffers(row, items));
 
   return (
-    <div className="compare-table-wrap" tabIndex={0} role="region" aria-label="Comparison table, scroll sideways if needed">
+    <div className="compare-table-wrap" tabIndex={0} role="region" aria-label={t('compare.tableLabel')}>
       <table className="compare-table">
-        <caption className="visually-hidden">Side-by-side comparison of {items.length} products</caption>
+        <caption className="visually-hidden">{t('compare.tableCaption', { count: items.length })}</caption>
         <thead>
           <tr>
-            <td className="compare-table__corner">Feature</td>
+            <td className="compare-table__corner">{t('compare.feature')}</td>
             {items.map((p) => (
               <th key={p.id} scope="col" className="compare-table__product">
                 <Link to={`/products/${p.id}`} className="compare-table__product-name">
@@ -42,7 +44,7 @@ export function CompareTable({ items, differencesOnly }: CompareViewProps) {
               <tr key={row.id} className={row.restriction ? 'compare-table__row--restriction' : undefined}>
                 <th scope="row">
                   <RowLabel label={row.label} glossaryId={row.glossaryId} />
-                  {differs && <span className="differs-tag">Differs</span>}
+                  {differs && <span className="differs-tag">{t('compare.differs')}</span>}
                 </th>
                 {items.map((p) => (
                   <td key={p.id}>
@@ -60,11 +62,12 @@ export function CompareTable({ items, differencesOnly }: CompareViewProps) {
 
 /** Field-by-field stacked layout for small screens, so values never squeeze into narrow columns. */
 export function CompareStacked({ items, differencesOnly }: CompareViewProps) {
-  const rows = compareRows.filter((row) => !differencesOnly || rowDiffers(row, items));
+  const { t } = useI18n();
+  const rows = getCompareRows(t).filter((row) => !differencesOnly || rowDiffers(row, items));
 
   return (
     <div className="compare-stacked">
-      <ol className="compare-stacked__products" aria-label="Products being compared">
+      <ol className="compare-stacked__products" aria-label={t('compare.productsBeingCompared')}>
         {items.map((p, index) => (
           <li key={p.id} className="compare-stacked__product">
             <span className="slot-letter" aria-hidden>{String.fromCharCode(65 + index)}</span>
@@ -80,7 +83,7 @@ export function CompareStacked({ items, differencesOnly }: CompareViewProps) {
         <section key={row.id} className={`compare-field${row.restriction ? ' compare-field--restriction' : ''}`}>
           <h3 className="compare-field__label">
             <RowLabel label={row.label} glossaryId={row.glossaryId} />
-            {rowDiffers(row, items) && <span className="differs-tag">Differs</span>}
+            {rowDiffers(row, items) && <span className="differs-tag">{t('compare.differs')}</span>}
           </h3>
           <dl className="compare-field__values">
             {items.map((p, index) => (

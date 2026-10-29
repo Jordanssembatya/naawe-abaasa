@@ -1,10 +1,12 @@
 import { Check, RotateCcw } from 'lucide-react';
+import { useI18n } from '../../i18n/I18nProvider';
 import { buildChecklist } from '../../lib/checklist';
 import { useChecklist } from '../../state/useChecklist';
 import type { InsuranceProduct } from '../../types/product';
 
 export function EnrolmentChecklist({ product }: { product: InsuranceProduct }) {
-  const items = buildChecklist(product);
+  const { t } = useI18n();
+  const items = buildChecklist(product, t);
   const { completed, toggle, reset, total } = useChecklist(
     product.id,
     items.map((i) => i.id),
@@ -16,13 +18,11 @@ export function EnrolmentChecklist({ product }: { product: InsuranceProduct }) {
     <div className="checklist">
       <div className="checklist__progress">
         <div className="checklist__progress-text">
-          <span id="checklist-progress-label">
-            {completed.length} of {total} steps done
-          </span>
+          <span id="checklist-progress-label">{t('enrol.progress', { done: completed.length, total })}</span>
           {completed.length > 0 && (
             <button type="button" className="button button--ghost button--sm" onClick={reset}>
               <RotateCcw size={14} aria-hidden />
-              Start again
+              {t('enrol.startAgain')}
             </button>
           )}
         </div>
@@ -58,7 +58,7 @@ export function EnrolmentChecklist({ product }: { product: InsuranceProduct }) {
                 <span>
                   <span className="checklist__title">{item.title}</span>
                   {item.detail && <span className="checklist__detail">{item.detail}</span>}
-                  {item.id.startsWith('product-') && <span className="checklist__tag">For this product</span>}
+                  {item.id.startsWith('product-') && <span className="checklist__tag">{t('enrol.forThisProduct')}</span>}
                 </span>
               </label>
             </li>
@@ -67,9 +67,7 @@ export function EnrolmentChecklist({ product }: { product: InsuranceProduct }) {
       </ol>
 
       <p className="checklist__saved" role="status">
-        {allDone
-          ? 'All steps done. You are ready to contact the insurer or a licensed intermediary.'
-          : 'Your ticks are saved only in this browser. Nothing is sent anywhere.'}
+        {allDone ? t('enrol.allDone') : t('enrol.savedNote')}
       </p>
     </div>
   );

@@ -1,5 +1,6 @@
 import { CheckCircle2, TriangleAlert, X } from 'lucide-react';
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useI18n } from '../i18n/I18nProvider';
 
 type ToastTone = 'info' | 'warning';
 
@@ -19,6 +20,7 @@ const TOAST_MS = 4000;
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(1);
+  const { t } = useI18n();
 
   const dismiss = useCallback((id: number) => setToasts((all) => all.filter((t) => t.id !== id)), []);
 
@@ -38,11 +40,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div className="toast-region" role="status" aria-live="polite">
-        {toasts.map((t) => (
-          <div key={t.id} className={`toast toast--${t.tone}`}>
-            {t.tone === 'warning' ? <TriangleAlert size={18} aria-hidden /> : <CheckCircle2 size={18} aria-hidden />}
-            <span>{t.message}</span>
-            <button type="button" className="toast__close" onClick={() => dismiss(t.id)} aria-label="Dismiss message">
+        {toasts.map((toast) => (
+          <div key={toast.id} className={`toast toast--${toast.tone}`}>
+            {toast.tone === 'warning' ? <TriangleAlert size={18} aria-hidden /> : <CheckCircle2 size={18} aria-hidden />}
+            <span>{toast.message}</span>
+            <button type="button" className="toast__close" onClick={() => dismiss(toast.id)} aria-label={t('common.dismissMessage')}>
               <X size={16} aria-hidden />
             </button>
           </div>

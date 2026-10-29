@@ -1,4 +1,7 @@
+import { useI18n } from '../../i18n/I18nProvider';
+
 export function Logo({ inverted = false }: { inverted?: boolean }) {
+  const { t } = useI18n();
   return (
     <span className={`logo${inverted ? ' logo--inverted' : ''}`}>
       <svg className="logo__mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden>
@@ -7,7 +10,7 @@ export function Logo({ inverted = false }: { inverted?: boolean }) {
         <path d="M14.5 12h3v3h3v3h-3v3h-3v-3h-3v-3h3z" fill="#fff" />
       </svg>
       <span className="logo__text">
-        AfyaGuide <span className="logo__country">Uganda</span>
+        {t('brand.name')} <span className="logo__country">{t('brand.country')}</span>
       </span>
     </span>
   );

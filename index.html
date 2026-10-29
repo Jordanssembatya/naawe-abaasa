@@ -6,12 +6,12 @@
     <meta name="theme-color" content="#102B46" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="AfyaGuide" />
+    <meta name="apple-mobile-web-app-title" content="InsurGuide" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="description" content="Explore, understand and compare health insurance options in Uganda in plain English. Prototype with demonstration data." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>AfyaGuide Uganda — Understand your health cover</title>
+    <title>InsurGuide — Understand your health cover</title>
     <style>
       /* Boot loader: shown until React replaces the contents of #root. Inline because global.css arrives with the JS bundle. */
       body { margin: 0; background: #f5f8fa; }
@@ -36,10 +36,21 @@
     <div id="root">
       <div class="boot-loader" role="status" aria-live="polite">
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#102B46"/><path d="M16 7l8 3v6c0 5-3.4 8.4-8 9.6C11.4 24.4 8 21 8 16v-6l8-3z" fill="#087E8B"/><path d="M14.5 12h3v3h3v3h-3v3h-3v-3h-3v-3h3z" fill="#fff"/></svg>
-        <span>Loading AfyaGuide…</span>
-        <noscript><p>AfyaGuide needs JavaScript to run. Please enable it in your browser settings and reload the page.</p></noscript>
+        <span id="boot-text">Loading InsurGuide…</span>
+        <noscript><p>InsurGuide needs JavaScript to run. Please enable it in your browser settings and reload the page.</p></noscript>
       </div>
     </div>
+    <script>
+      // Show the loader in the saved language. Key and codes match src/i18n/config.ts.
+      try {
+        var saved = JSON.parse(localStorage.getItem('insurguide.language'));
+        var boot = { lg: ['lg', 'InsurGuide eggulawo…'], sw: ['sw', 'Inapakia InsurGuide…'], nyn: ['nyn', 'InsurGuide neeyiguka…'] }[saved];
+        if (boot) {
+          document.documentElement.lang = boot[0];
+          document.getElementById('boot-text').textContent = boot[1];
+        }
+      } catch (e) {}
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

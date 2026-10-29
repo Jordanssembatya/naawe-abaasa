@@ -1,45 +1,41 @@
 import { Link } from 'react-router';
+import { useI18n } from '../../i18n/I18nProvider';
 import { Logo } from './Logo';
 
 export function Footer() {
+  const { t } = useI18n();
   return (
     <footer className="site-footer">
       <div className="container site-footer__grid">
         <div className="site-footer__about">
           <Logo />
-          <p>
-            A prototype to help people in Uganda understand and compare health insurance in plain English. It does
-            not sell insurance, decide eligibility or process payments.
-          </p>
+          <p>{t('footer.about')}</p>
         </div>
-        <nav aria-label="Explore">
-          <p className="site-footer__heading">Explore</p>
+        <nav aria-label={t('footer.explore')}>
+          <p className="site-footer__heading">{t('footer.explore')}</p>
           <ul>
-            <li><Link to="/products">All products</Link></li>
-            <li><Link to="/compare">Compare plans</Link></li>
-            <li><Link to="/glossary">Insurance glossary</Link></li>
+            <li><Link to="/products">{t('footer.allProducts')}</Link></li>
+            <li><Link to="/compare">{t('footer.comparePlans')}</Link></li>
+            <li><Link to="/glossary">{t('footer.glossary')}</Link></li>
           </ul>
         </nav>
-        <nav aria-label="Transparency">
-          <p className="site-footer__heading">Transparency</p>
+        <nav aria-label={t('footer.transparency')}>
+          <p className="site-footer__heading">{t('footer.transparency')}</p>
           <ul>
-            <li><Link to="/about">About this prototype</Link></li>
-            <li><Link to="/about#demo-data">About the product data</Link></li>
-            <li><Link to="/about#verify">How to verify details</Link></li>
+            <li><Link to="/about">{t('footer.aboutPrototype')}</Link></li>
+            <li><Link to="/about#demo-data">{t('footer.aboutData')}</Link></li>
+            <li><Link to="/about#verify">{t('footer.howToVerify')}</Link></li>
           </ul>
         </nav>
         <div>
-          <p className="site-footer__heading">Before you choose</p>
-          <p className="site-footer__note">
-            Product terms can change. Confirm the current cover, limits and price with the insurer or a licensed
-            agent or broker before you pay anything.
-          </p>
+          <p className="site-footer__heading">{t('footer.beforeYouChoose')}</p>
+          <p className="site-footer__note">{t('footer.beforeNote')}</p>
         </div>
       </div>
       <div className="site-footer__bar">
         <div className="container site-footer__bar-inner">
-          <p>Prototype for the UIA Simplified Health Insurance Access challenge. All products shown are fictional.</p>
-          <p>Not affiliated with or endorsed by the Uganda Insurers Association or any insurer.</p>
+          <p>{t('footer.challenge')}</p>
+          <p>{t('footer.notAffiliated')}</p>
         </div>
       </div>
     </footer>

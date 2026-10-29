@@ -11,7 +11,7 @@ import { NotFoundPage, RouteErrorPage } from './pages/NotFoundPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 
 // Pages below a tab get a phone app bar with Back and a title (see lib/appBar.ts).
-const appBar = (title: string, backTo: AppBarHandle['backTo']): AppBarHandle => ({ title, backTo });
+const appBar = (title: AppBarHandle['title'], backTo: AppBarHandle['backTo']): AppBarHandle => ({ title, backTo });
 
 export const routes: RouteObject[] = [
   {
@@ -25,17 +25,17 @@ export const routes: RouteObject[] = [
           {
             path: 'products/:productId',
             element: <ProductDetailPage />,
-            handle: appBar('Product details', () => '/products'),
+            handle: appBar('appBar.productDetails', () => '/products'),
           },
           {
             path: 'products/:productId/enrol',
             element: <EnrolmentPage />,
-            handle: appBar('Enrolment guide', ({ productId }) => `/products/${productId}`),
+            handle: appBar('appBar.enrolmentGuide', ({ productId }) => `/products/${productId}`),
           },
           { path: 'compare', element: <ComparePage /> },
           { path: 'glossary', element: <GlossaryPage /> },
-          { path: 'about', element: <AboutPage />, handle: appBar('About', () => '/') },
-          { path: '*', element: <NotFoundPage />, handle: appBar('Not found', () => '/') },
+          { path: 'about', element: <AboutPage />, handle: appBar('appBar.about', () => '/') },
+          { path: '*', element: <NotFoundPage />, handle: appBar('appBar.notFound', () => '/') },
         ],
       },
     ],

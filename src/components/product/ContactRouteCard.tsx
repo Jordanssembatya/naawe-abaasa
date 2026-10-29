@@ -1,6 +1,6 @@
 import { Globe, Mail, Phone, ShieldQuestion } from 'lucide-react';
 import { Link } from 'react-router';
-import { formatDate } from '../../lib/format';
+import { useI18n } from '../../i18n/I18nProvider';
 import type { ContactChannel, ContactRoute } from '../../types/product';
 
 const channelIcons = { phone: Phone, email: Mail, website: Globe };
@@ -18,6 +18,7 @@ function hrefFor(channel: ContactChannel): string {
 
 /** Shows a verified contact route, or explains that none is available. */
 export function ContactRouteCard({ route }: { route: ContactRoute }) {
+  const { t, formatDate } = useI18n();
   if (route.status === 'unverified') {
     return (
       <div className="contact-card contact-card--unverified">
@@ -25,11 +26,11 @@ export function ContactRouteCard({ route }: { route: ContactRoute }) {
           <ShieldQuestion size={22} aria-hidden />
         </div>
         <div>
-          <h3 className="contact-card__title">Contact route not verified</h3>
+          <h3 className="contact-card__title">{t('product.contact.unverifiedTitle')}</h3>
           <p>{route.note}</p>
           <p>
-            We do not show phone numbers, emails or links unless they have been verified.{' '}
-            <Link to="/about#verify">How to find an official contact</Link>
+            {t('product.contact.unverifiedText')}{' '}
+            <Link to="/about#verify">{t('product.contact.howToFind')}</Link>
           </p>
         </div>
       </div>
@@ -57,7 +58,7 @@ export function ContactRouteCard({ route }: { route: ContactRoute }) {
           );
         })}
       </ul>
-      <p className="muted">Contact details verified on {formatDate(route.verifiedAt)}.</p>
+      <p className="muted">{t('product.contact.verifiedOn', { date: formatDate(route.verifiedAt) })}</p>
     </div>
   );
 }

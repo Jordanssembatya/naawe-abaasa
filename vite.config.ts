@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'AfyaGuide Uganda',
-        short_name: 'AfyaGuide',
+        name: 'InsurGuide',
+        short_name: 'InsurGuide',
         description: 'Explore, understand and compare health insurance options in Uganda in plain English.',
         id: '/',
         lang: 'en-UG',

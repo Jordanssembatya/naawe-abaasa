@@ -1,20 +1,22 @@
 import { ArrowRight, Building2, Users } from 'lucide-react';
 import { Link } from 'react-router';
-import { coverForLabels, customerCategoryLabels } from '../../data/labels';
+import { useI18n } from '../../i18n/I18nProvider';
 import { formatPremium } from '../../lib/format';
 import type { InsuranceProduct } from '../../types/product';
 import { Term } from '../glossary/Term';
 import { CompareToggle } from './CompareToggle';
 import { CoverageChips } from './CoverageChips';
 
+/** Pass the product already translated (useI18n().products / getProduct). */
 export function ProductCard({ product }: { product: InsuranceProduct }) {
+  const { t } = useI18n();
   const headingId = `product-${product.id}`;
   return (
     <article className="product-card" aria-labelledby={headingId}>
       {product.coverFor && (
         <p className="product-card__for">
           <Users size={20} aria-hidden />
-          {product.coverFor.map((c) => coverForLabels[c]).join(' or ')}
+          {product.coverFor.map((c) => t(`labels.coverFor.${c}`)).join(t('common.or'))}
         </p>
       )}
 
@@ -32,26 +34,26 @@ export function ProductCard({ product }: { product: InsuranceProduct }) {
       <dl className="product-card__facts">
         <div>
           <dt>
-            <Term id="premium">Premium</Term>
+            <Term id="premium">{t('product.premium')}</Term>
           </dt>
           <dd>
-            {formatPremium(product.premium)}
-            {product.premium?.illustrative && <span className="fact-note">Fictional value</span>}
+            {formatPremium(product.premium, t)}
+            {product.premium?.illustrative && <span className="fact-note">{t('common.fictionalValue')}</span>}
           </dd>
         </div>
         <div>
-          <dt>Intended for</dt>
+          <dt>{t('product.intendedFor')}</dt>
           <dd>
             {product.targetCustomers
-              ? product.targetCustomers.map((c) => customerCategoryLabels[c]).join(', ')
-              : 'Not specified'}
+              ? product.targetCustomers.map((c) => t(`labels.customerCategory.${c}`)).join(t('common.listSeparator'))
+              : t('common.notSpecified')}
           </dd>
         </div>
       </dl>
 
       <div className="product-card__actions">
         <Link to={`/products/${product.id}`} className="button button--primary button--sm">
-          View details
+          {t('product.viewDetails')}
           <ArrowRight size={16} aria-hidden />
         </Link>
         <CompareToggle product={product} size="sm" />

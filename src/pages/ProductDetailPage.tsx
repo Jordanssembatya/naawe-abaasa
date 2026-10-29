@@ -23,17 +23,11 @@ import { InfoList } from '../components/product/InfoList';
 import { MissingInfoNotice } from '../components/product/MissingInfoNotice';
 import { NotSpecified } from '../components/ui/NotSpecified';
 import { Notice } from '../components/ui/Notice';
-import { getGlossaryEntry } from '../data/glossary';
-import {
-  coverForLabels,
-  coverageGlossaryIds,
-  coverageLabels,
-  coverageStatusLabels,
-  customerCategoryLabels,
-} from '../data/labels';
+import { COVERAGE_KEYS, coverageGlossaryIds } from '../data/labels';
 import { getProductById } from '../data/products';
-import { formatDate, formatPremium } from '../lib/format';
-import type { CoverageKey, InsuranceProduct } from '../types/product';
+import { useI18n } from '../i18n/I18nProvider';
+import { formatPremium } from '../lib/format';
+import type { InsuranceProduct } from '../types/product';
 import { NotFoundPage } from './NotFoundPage';
 
 interface DetailSectionProps {
@@ -58,7 +52,7 @@ function DetailSection({ id, title, icon: Icon, tone = 'default', children }: De
   );
 }
 
-/** Glossary terms worth explaining for this product. */
+/** Glossary terms worth explaining for this product. Checks the English record. */
 function termsFor(product: InsuranceProduct): string[] {
   const ids = ['premium', 'benefit-limit', 'exclusion', 'waiting-period', 'inpatient', 'outpatient', 'pre-existing-condition'];
   if (product.benefitLimits?.some((l) => l.label.toLowerCase().includes('co-payment'))) ids.push('co-payment');
@@ -66,12 +60,12 @@ function termsFor(product: InsuranceProduct): string[] {
   return ids;
 }
 
-const coverageKeys = Object.keys(coverageLabels) as CoverageKey[];
-
 export function ProductDetailPage() {
   const { productId = '' } = useParams();
-  const product = getProductById(productId);
-  if (!product) return <NotFoundPage what="product" />;
+  const { t, tRich, getProduct, getGlossaryEntry, formatDate } = useI18n();
+  const source = getProductById(productId);
+  const product = getProduct(productId);
+  if (!source || !product) return <NotFoundPage what="product" />;
 
   return (
     <>
@@ -79,7 +73,7 @@ export function ProductDetailPage() {
         <div className="container">
           <Link to="/products" className="back-link">
             <ArrowLeft size={16} aria-hidden />
-            All products
+            {t('product.allProducts')}
           </Link>
           <div className="product-hero">
             <div>
@@ -93,7 +87,7 @@ export function ProductDetailPage() {
             <div className="product-hero__actions">
               <Link to={`/products/${product.id}/enrol`} className="button button--primary">
                 <ClipboardCheck size={16} aria-hidden />
-                Enrolment guide
+                {t('product.enrolmentGuide')}
               </Link>
               <CompareToggle product={product} />
             </div>
@@ -105,22 +99,21 @@ export function ProductDetailPage() {
         <div className="detail-main">
           <MissingInfoNotice product={product} />
 
-          <DetailSection id="summary" title="Coverage summary" icon={ShieldAlert}>
+          <DetailSection id="summary" title={t('product.coverageSummary')} icon={ShieldAlert}>
             <p className="lead-text">{product.coverageSummary}</p>
             <ul className="coverage-grid">
-              {coverageKeys.map((key) => {
+              {COVERAGE_KEYS.map((key) => {
                 const area = product.coverage[key];
                 const Icon = coverageStatusIcons[area.status];
                 const glossaryId = coverageGlossaryIds[key];
+                const label = t(`labels.coverage.${key}`);
                 return (
                   <li key={key} className={`coverage-tile coverage-tile--${area.status}`}>
                     <span className="coverage-tile__head">
                       <Icon size={18} aria-hidden />
-                      <span className="coverage-tile__name">
-                        {glossaryId ? <Term id={glossaryId}>{coverageLabels[key]}</Term> : coverageLabels[key]}
-                      </span>
+                      <span className="coverage-tile__name">{glossaryId ? <Term id={glossaryId}>{label}</Term> : label}</span>
                     </span>
-                    <span className="coverage-tile__status">{coverageStatusLabels[area.status]}</span>
+                    <span className="coverage-tile__status">{t(`labels.coverageStatus.${area.status}`)}</span>
                     {area.summary && <span className="coverage-tile__summary">{area.summary}</span>}
                   </li>
                 );
@@ -128,30 +121,30 @@ export function ProductDetailPage() {
             </ul>
           </DetailSection>
 
-          <DetailSection id="services" title="Covered services and benefits" icon={CircleCheck}>
+          <DetailSection id="services" title={t('product.coveredServices')} icon={CircleCheck}>
             <InfoList items={product.coveredServices} icon={<CircleCheck size={18} />} />
           </DetailSection>
 
-          <DetailSection id="limits" title={<><Term id="benefit-limit">Benefit limits</Term></>} icon={Wallet} tone="warning">
+          <DetailSection id="limits" title={<Term id="benefit-limit">{t('product.benefitLimits')}</Term>} icon={Wallet} tone="warning">
             <p className="muted">
-              The most the insurer will pay. Costs above a limit are paid by you.
-              {product.dataStatus === 'demo' && ' Amounts are fictional demonstration values.'}
+              {t('product.limitsNote')}
+              {product.dataStatus === 'demo' && ` ${t('product.limitsDemoNote')}`}
             </p>
             <BenefitLimitsTable limits={product.benefitLimits} />
           </DetailSection>
 
-          <DetailSection id="exclusions" title={<><Term id="exclusion">Exclusions</Term> and restrictions</>} icon={Ban} tone="warning">
-            <InfoList
-              items={product.exclusions}
-              icon={<Ban size={18} />}
-              variant="warning"
-              missingHint="This does not mean there are no exclusions. Every policy has some. Ask for the full list."
-            />
+          <DetailSection
+            id="exclusions"
+            title={tRich('product.exclusionsTitle', { term: <Term id="exclusion">{t('product.exclusions')}</Term> })}
+            icon={Ban}
+            tone="warning"
+          >
+            <InfoList items={product.exclusions} icon={<Ban size={18} />} variant="warning" missingHint={t('product.exclusionsHint')} />
           </DetailSection>
 
-          <DetailSection id="waiting" title={<><Term id="waiting-period">Waiting periods</Term></>} icon={Clock}>
+          <DetailSection id="waiting" title={<Term id="waiting-period">{t('product.waitingPeriods')}</Term>} icon={Clock}>
             {product.waitingPeriods === null ? (
-              <NotSpecified hint="Ask the insurer when each type of cover starts." />
+              <NotSpecified hint={t('product.waitingHint')} />
             ) : (
               <dl className="kv-list">
                 {product.waitingPeriods.map((w) => (
@@ -164,48 +157,52 @@ export function ProductDetailPage() {
             )}
           </DetailSection>
 
-          <DetailSection id="eligibility" title="Eligibility" icon={ListChecks}>
-            <InfoList items={product.eligibility} missingHint="Confirm with the insurer whether you qualify." />
+          <DetailSection id="eligibility" title={t('product.eligibility')} icon={ListChecks}>
+            <InfoList items={product.eligibility} missingHint={t('product.eligibilityHint')} />
           </DetailSection>
 
-          <DetailSection id="premium" title={<><Term id="premium">Premium</Term> (price)</>} icon={Wallet}>
+          <DetailSection
+            id="premium"
+            title={tRich('product.premiumTitle', { term: <Term id="premium">{t('product.premium')}</Term> })}
+            icon={Wallet}
+          >
             {product.premium ? (
               <div className="premium-display">
-                <p className="premium-display__amount">{formatPremium(product.premium)}</p>
+                <p className="premium-display__amount">{formatPremium(product.premium, t)}</p>
                 <p className="muted">{product.premium.basis}</p>
-                {product.premium.illustrative && (
-                  <p className="fact-note">Fictional demonstration value. Real prices must come from the insurer.</p>
-                )}
+                {product.premium.illustrative && <p className="fact-note">{t('product.premiumFictional')}</p>}
               </div>
             ) : (
-              <NotSpecified hint="Ask the insurer for the current price." />
+              <NotSpecified hint={t('product.premiumHint')} />
             )}
           </DetailSection>
 
-          <DetailSection id="enrolment" title="Enrolment requirements and documents" icon={FileText}>
-            <h3 className="subheading">Requirements</h3>
+          <DetailSection id="enrolment" title={t('product.enrolmentTitle')} icon={FileText}>
+            <h3 className="subheading">{t('product.requirements')}</h3>
             <InfoList items={product.enrolmentRequirements} />
-            <h3 className="subheading">Documents you may need</h3>
-            <InfoList items={product.requiredDocuments} missingHint="Ask the insurer which documents they need." />
+            <h3 className="subheading">{t('product.documentsYouMayNeed')}</h3>
+            <InfoList items={product.requiredDocuments} missingHint={t('product.documentsHint')} />
           </DetailSection>
 
-          <DetailSection id="steps" title="Enrolment steps" icon={ClipboardCheck}>
-            <p>
-              Follow the step-by-step checklist for this product. It covers what to confirm and ask before you sign up.
-            </p>
+          <DetailSection id="steps" title={t('product.stepsTitle')} icon={ClipboardCheck}>
+            <p>{t('product.stepsText')}</p>
             <Link to={`/products/${product.id}/enrol`} className="button button--primary">
-              Open the enrolment guide
+              {t('product.openGuide')}
               <ArrowRight size={16} aria-hidden />
             </Link>
           </DetailSection>
 
-          <DetailSection id="contact" title={<>Insurer or <Term id="intermediary">authorised intermediary</Term> contact</>} icon={Building2}>
+          <DetailSection
+            id="contact"
+            title={tRich('product.contactTitle', { term: <Term id="intermediary">{t('product.intermediary')}</Term> })}
+            icon={Building2}
+          >
             <ContactRouteCard route={product.contactRoute} />
           </DetailSection>
 
-          <DetailSection id="meaning" title="What this means" icon={FileText}>
+          <DetailSection id="meaning" title={t('product.meaningTitle')} icon={FileText}>
             <dl className="definition-list">
-              {termsFor(product).map((id) => {
+              {termsFor(source).map((id) => {
                 const entry = getGlossaryEntry(id);
                 return entry ? (
                   <div key={id} className="definition-list__row">
@@ -216,47 +213,50 @@ export function ProductDetailPage() {
               })}
             </dl>
             <p className="muted">
-              These are general explanations. The insurer&rsquo;s policy wording decides what applies.{' '}
-              <Link to="/glossary">Open the glossary</Link>
+              {t('product.meaningNote')} <Link to="/glossary">{t('product.openGlossary')}</Link>
             </p>
           </DetailSection>
         </div>
 
-        <aside className="detail-aside" aria-label="Product at a glance">
+        <aside className="detail-aside" aria-label={t('product.atAGlanceLabel')}>
           <div className="summary-card">
-            <h2 className="summary-card__title">At a glance</h2>
+            <h2 className="summary-card__title">{t('product.atAGlance')}</h2>
             <dl className="summary-card__facts">
               <div>
-                <dt>Premium</dt>
-                <dd>{formatPremium(product.premium)}</dd>
+                <dt>{t('product.premium')}</dt>
+                <dd>{formatPremium(product.premium, t)}</dd>
               </div>
               <div>
-                <dt>Who is covered</dt>
-                <dd>{product.coverFor ? product.coverFor.map((c) => coverForLabels[c]).join(' or ') : 'Not specified'}</dd>
-              </div>
-              <div>
-                <dt>Intended for</dt>
+                <dt>{t('product.whoIsCovered')}</dt>
                 <dd>
-                  {product.targetCustomers
-                    ? product.targetCustomers.map((c) => customerCategoryLabels[c]).join(', ')
-                    : 'Not specified'}
+                  {product.coverFor
+                    ? product.coverFor.map((c) => t(`labels.coverFor.${c}`)).join(t('common.or'))
+                    : t('common.notSpecified')}
                 </dd>
               </div>
               <div>
-                <dt>Last verified</dt>
-                <dd>{product.lastVerifiedAt ? formatDate(product.lastVerifiedAt) : 'Never verified'}</dd>
+                <dt>{t('product.intendedFor')}</dt>
+                <dd>
+                  {product.targetCustomers
+                    ? product.targetCustomers.map((c) => t(`labels.customerCategory.${c}`)).join(t('common.listSeparator'))
+                    : t('common.notSpecified')}
+                </dd>
+              </div>
+              <div>
+                <dt>{t('product.lastVerified')}</dt>
+                <dd>{product.lastVerifiedAt ? formatDate(product.lastVerifiedAt) : t('product.neverVerified')}</dd>
               </div>
             </dl>
             <div className="summary-card__actions">
               <Link to={`/products/${product.id}/enrol`} className="button button--primary button--block">
-                Enrolment guide
+                {t('product.enrolmentGuide')}
               </Link>
               <Link to="/compare" className="button button--secondary button--block">
-                Go to comparison
+                {t('product.goToComparison')}
               </Link>
             </div>
           </div>
-          <Notice tone="info" title="Source">
+          <Notice tone="info" title={t('product.source')}>
             {product.sourceNotes}
           </Notice>
         </aside>

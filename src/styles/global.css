@@ -667,6 +667,13 @@ select.input {
   color: var(--color-teal);
 }
 
+/* Narrow phones: make room for the language switcher beside the logo. */
+@media (max-width: 399px) {
+  .site-header .logo__country {
+    display: none;
+  }
+}
+
 .site-nav {
   display: none;
   align-items: center;
@@ -703,6 +710,75 @@ select.input {
 
 .site-header__cta {
   display: none;
+}
+
+/* Language switcher: a native select laid invisibly over a compact label */
+.lang-switcher {
+  position: relative;
+  flex: none;
+}
+
+.lang-switcher__face {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 40px;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-navy);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lang-switcher__name {
+  display: none;
+}
+
+.lang-switcher__chevron {
+  color: var(--color-text-muted);
+}
+
+.lang-switcher__select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px; /* stops iOS zooming in on focus */
+}
+
+.lang-switcher:hover .lang-switcher__face {
+  border-color: var(--color-teal);
+}
+
+.lang-switcher:focus-within .lang-switcher__face {
+  border-color: var(--color-teal);
+  box-shadow: var(--focus-ring);
+}
+
+@media (min-width: 640px) {
+  .lang-switcher__name {
+    display: inline;
+  }
+
+  .lang-switcher__short {
+    display: none;
+  }
+}
+
+/* English word shown under a translated glossary term */
+.term-english {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0;
 }
 
 @media (min-width: 1024px) {
@@ -808,6 +884,19 @@ select.input {
 
   .tab-bar__link:hover {
     color: var(--color-navy);
+  }
+
+  /* Some translated tab names are long ("Gyeragyeranisa"); keep them on one line. */
+  .tab-bar__label {
+    max-width: 100%;
+    padding: 0 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .tab-bar__link {
+    min-width: 0;
   }
 
   .tab-bar__icon {
@@ -939,19 +1028,53 @@ select.input {
   max-width: var(--container);
 }
 
+/* Heading, lead and buttons sit in a centred column. */
 .hero__inner > * {
   max-width: 44rem;
+  margin-inline: auto;
 }
 
 .hero__inner > .hero__toolbar {
   max-width: none;
 }
 
+/* Stacked (phones and tablets): search on top, popular chips centred below. */
 .hero__toolbar {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-4) var(--space-6);
+  gap: var(--space-4);
+}
+
+/* Wide screens: one row, popular chips on the left and search on the right. */
+@media (min-width: 1280px) {
+  .hero__toolbar {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+
+  .hero__toolbar .hero__quick {
+    order: -1;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  /* Slimmer here, so it balances the chips instead of dominating the row. */
+  .hero__toolbar .hero-search {
+    flex: 0 0 21rem;
+    padding: var(--space-1);
+  }
+
+  .hero__toolbar .hero-search__input {
+    min-height: 40px;
+  }
+
+  .hero__toolbar .hero-search__submit {
+    width: 40px;
+    min-height: 40px;
+  }
 }
 
 .hero__title {
@@ -961,6 +1084,7 @@ select.input {
   font-weight: 700;
   line-height: 1.1;
   color: #fff;
+  text-align: center;
   text-wrap: balance;
 }
 
@@ -969,13 +1093,14 @@ select.input {
   font-size: var(--text-lg);
   line-height: 1.7;
   color: rgb(255 255 255 / 0.82);
+  text-align: center;
 }
 
 .hero-search {
   position: relative;
   display: flex;
-  flex: 1 1 20rem;
-  max-width: 26rem;
+  width: 100%;
+  max-width: 36rem;
   gap: var(--space-2);
   padding: var(--space-2);
   border-radius: var(--radius-lg);
@@ -1012,13 +1137,22 @@ select.input {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
 }
 
 .hero__quick-label {
-  font-size: var(--text-sm);
-  color: rgb(255 255 255 / 0.7);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-right: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #fff;
+}
+
+.hero__quick-label svg {
+  color: #7fd3dc;
 }
 
 .hero__quick .pill {
@@ -1026,9 +1160,24 @@ select.input {
   min-height: 36px;
 }
 
+/* Tablets and up have room for larger chips. */
+@media (min-width: 768px) {
+  .hero__quick-label {
+    margin-right: var(--space-2);
+    font-size: var(--text-base);
+  }
+
+  .hero__quick .pill {
+    min-height: 40px;
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.9375rem;
+  }
+}
+
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-4);
   margin-top: var(--space-8);
 }

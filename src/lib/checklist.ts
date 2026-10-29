@@ -1,3 +1,4 @@
+import type { MessageKey, Translate } from '../i18n/translator';
 import type { InsuranceProduct } from '../types/product';
 
 export interface ChecklistItem {
@@ -6,46 +7,28 @@ export interface ChecklistItem {
   detail?: string;
 }
 
+interface StandardStep {
+  id: string;
+  title: MessageKey;
+  detail?: MessageKey;
+}
+
 /** Standard steps that apply to every product, in order. */
-const standardSteps: ChecklistItem[] = [
-  {
-    id: 'review-cover',
-    title: 'Review what is covered and what is excluded',
-    detail: 'Read the coverage, benefit limits and exclusions on the product page.',
-  },
-  {
-    id: 'confirm-eligibility',
-    title: 'Confirm you are eligible',
-    detail: 'Ask the insurer or a licensed agent or broker whether you and any dependants qualify.',
-  },
-  {
-    id: 'confirm-price',
-    title: 'Confirm the current premium, payment options and benefit limits',
-    detail: 'Prices and limits can change. Get the current figures from the insurer.',
-  },
-  {
-    id: 'ask-waiting-docs',
-    title: 'Ask about waiting periods and the documents you need',
-  },
-  {
-    id: 'get-form',
-    title: 'Get the official application form from the insurer or a licensed intermediary',
-    detail: 'Fill it in yourself and answer the health questions honestly.',
-  },
-  {
-    id: 'confirm-submission',
-    title: 'Confirm how to submit your documents and payment',
-    detail: 'Only pay through channels the insurer confirms in writing.',
-  },
-  {
-    id: 'written-terms',
-    title: 'Ask for the policy terms in writing before you commit',
-  },
+const standardSteps: StandardStep[] = [
+  { id: 'review-cover', title: 'enrol.steps.reviewCover.title', detail: 'enrol.steps.reviewCover.detail' },
+  { id: 'confirm-eligibility', title: 'enrol.steps.confirmEligibility.title', detail: 'enrol.steps.confirmEligibility.detail' },
+  { id: 'confirm-price', title: 'enrol.steps.confirmPrice.title', detail: 'enrol.steps.confirmPrice.detail' },
+  { id: 'ask-waiting-docs', title: 'enrol.steps.askWaitingDocs.title' },
+  { id: 'get-form', title: 'enrol.steps.getForm.title', detail: 'enrol.steps.getForm.detail' },
+  { id: 'confirm-submission', title: 'enrol.steps.confirmSubmission.title', detail: 'enrol.steps.confirmSubmission.detail' },
+  { id: 'written-terms', title: 'enrol.steps.writtenTerms.title' },
 ];
 
-export function buildChecklist(product: InsuranceProduct): ChecklistItem[] {
+/** The checklist for a product, with text in the language of `t` (pass the product already translated). */
+export function buildChecklist(product: InsuranceProduct, t: Translate): ChecklistItem[] {
+  const standard = standardSteps.map(({ id, title, detail }) => ({ id, title: t(title), ...(detail ? { detail: t(detail) } : {}) }));
   const extra = (product.enrolmentSteps ?? []).map((title, index) => ({ id: `product-${index}`, title }));
   // Product-specific steps go before the form step, where they are most useful.
-  const insertAt = standardSteps.findIndex((s) => s.id === 'get-form');
-  return [...standardSteps.slice(0, insertAt), ...extra, ...standardSteps.slice(insertAt)];
+  const insertAt = standard.findIndex((s) => s.id === 'get-form');
+  return [...standard.slice(0, insertAt), ...extra, ...standard.slice(insertAt)];
 }

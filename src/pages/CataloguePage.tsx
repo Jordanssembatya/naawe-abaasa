@@ -6,6 +6,7 @@ import { ProductCard } from '../components/product/ProductCard';
 import { Notice } from '../components/ui/Notice';
 import { PageHeader } from '../components/ui/PageHeader';
 import { products } from '../data/products';
+import { useI18n } from '../i18n/I18nProvider';
 import {
   applyFilters,
   filtersFromParams,
@@ -13,11 +14,21 @@ import {
   hasActiveFilters,
   type CatalogueFilters as Filters,
 } from '../lib/catalogue';
+import type { InsuranceProduct } from '../types/product';
 
 export function CataloguePage() {
+  const { t, getProduct } = useI18n();
   const [params, setParams] = useSearchParams();
   const filters = useMemo(() => filtersFromParams(params), [params]);
-  const results = useMemo(() => applyFilters(products, filters), [filters]);
+  const results = useMemo(() => {
+    // Filter the English records, but let the search also match the translated text.
+    const translated = (p: InsuranceProduct) => getProduct(p.id) ?? p;
+    const matches = applyFilters(products, filters, (p) => {
+      const tp = translated(p);
+      return [p.name, p.insurer, p.tagline, tp.insurer, tp.tagline];
+    });
+    return matches.map(translated);
+  }, [filters, getProduct]);
   const active = hasActiveFilters(filters);
 
   // Filters live in the URL so Back from a product page restores them.
@@ -26,22 +37,21 @@ export function CataloguePage() {
 
   return (
     <>
-      <PageHeader eyebrow="Product catalogue" title="Explore health insurance products">
-        Search, filter and open any product to see its cover, limits and exclusions. Add two or three to compare them.
+      <PageHeader eyebrow={t('catalogue.eyebrow')} title={t('catalogue.title')}>
+        {t('catalogue.lead')}
       </PageHeader>
 
       <div className="container page-body">
-        <Notice tone="info" title="All products here are demonstration data">
-          They are fictional examples to show how the platform works. They are not real products offered by Ugandan
-          insurers.
+        <Notice tone="info" title={t('catalogue.noticeTitle')}>
+          {t('catalogue.noticeText')}
         </Notice>
 
         <CatalogueFilters filters={filters} onChange={onChange} onReset={onReset} canReset={active} />
 
         <p className="results-count" role="status" aria-live="polite">
           {results.length === products.length
-            ? `Showing all ${products.length} products`
-            : `${results.length} of ${products.length} products match`}
+            ? t('catalogue.showingAll', { count: products.length })
+            : t('catalogue.matching', { count: results.length, total: products.length })}
         </p>
 
         {results.length > 0 ? (
@@ -55,10 +65,10 @@ export function CataloguePage() {
             <span className="icon-tile icon-tile--lg">
               <SearchX size={28} aria-hidden />
             </span>
-            <h2 className="empty-state__title">No products match your search</h2>
-            <p>Try a different word, or remove some filters. You can search by product name or insurer.</p>
+            <h2 className="empty-state__title">{t('catalogue.emptyTitle')}</h2>
+            <p>{t('catalogue.emptyText')}</p>
             <button type="button" className="button button--primary" onClick={onReset}>
-              Clear search and filters
+              {t('catalogue.clearFilters')}
             </button>
           </div>
         )}

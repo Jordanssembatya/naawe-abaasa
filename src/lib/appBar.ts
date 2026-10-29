@@ -1,4 +1,5 @@
 import type { Params, UIMatch } from 'react-router';
+import type { MessageKey } from '../i18n/translator';
 
 /**
  * Route `handle` for pages below a tab (product details, enrolment, about…).
@@ -6,13 +7,14 @@ import type { Params, UIMatch } from 'react-router';
  * Tab pages (Home, Products, Compare, Glossary) have no handle.
  */
 export interface AppBarHandle {
-  title: string;
+  /** Message key of the title, translated when shown. */
+  title: MessageKey;
   /** Where Back goes when the page was opened directly, with no in-app page behind it. */
   backTo: (params: Params) => string;
 }
 
 export interface AppBar {
-  title: string;
+  title: MessageKey;
   backTo: string;
 }
 

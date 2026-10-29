@@ -114,7 +114,7 @@ test('installable app: manifest, and every page works offline after the first vi
   await page.goto('/');
 
   const manifest = await (await page.request.get('/manifest.webmanifest')).json();
-  expect(manifest).toMatchObject({ name: 'AfyaGuide Uganda', display: 'standalone', start_url: '/' });
+  expect(manifest).toMatchObject({ name: 'InsurGuide', display: 'standalone', start_url: '/' });
 
   // Wait until the service worker controls the page, so the app is cached.
   await page.evaluate(async () => {

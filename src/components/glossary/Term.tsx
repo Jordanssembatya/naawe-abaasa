@@ -1,7 +1,7 @@
 import { CircleHelp, X } from 'lucide-react';
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { getGlossaryEntry } from '../../data/glossary';
+import { useI18n } from '../../i18n/I18nProvider';
 
 interface TermProps {
   id: string;
@@ -22,6 +22,7 @@ const GUTTER = 16;
  * not depend on hover.
  */
 export function Term({ id, children }: TermProps) {
+  const { t, locale, getGlossaryEntry } = useI18n();
   const entry = getGlossaryEntry(id);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<Position | null>(null);
@@ -93,7 +94,7 @@ export function Term({ id, children }: TermProps) {
       >
         {children ?? entry.term.toLowerCase()}
         <CircleHelp size={14} aria-hidden className="term__icon" />
-        <span className="visually-hidden">(what does this mean?)</span>
+        <span className="visually-hidden">{t('glossary.term.whatDoesThisMean')}</span>
       </button>
       {open && (
         <span
@@ -101,20 +102,27 @@ export function Term({ id, children }: TermProps) {
           id={popoverId}
           className="term__popover"
           role="note"
-          aria-label={`${entry.term} explained`}
+          aria-label={t('glossary.term.explained', { term: entry.term })}
           style={position ? { top: position.top, left: position.left } : { visibility: 'hidden' }}
         >
           <span className="term__popover-head">
-            <strong>{entry.term}</strong>
-            <button type="button" className="icon-button icon-button--sm" onClick={() => setOpen(false)} aria-label="Close explanation">
+            <strong>
+              {entry.term}
+              {locale !== 'en' && (
+                <span className="term-english" lang="en">
+                  {entry.englishTerm}
+                </span>
+              )}
+            </strong>
+            <button type="button" className="icon-button icon-button--sm" onClick={() => setOpen(false)} aria-label={t('glossary.term.close')}>
               <X size={16} aria-hidden />
             </button>
           </span>
           <span className="term__popover-text">{entry.short}</span>
           <span className="term__popover-foot">
-            General explanation only. The policy wording decides what applies.{' '}
+            {t('glossary.term.foot')}{' '}
             <Link to={`/glossary#${entry.id}`} onClick={() => setOpen(false)}>
-              More in the glossary
+              {t('glossary.term.more')}
             </Link>
           </span>
         </span>

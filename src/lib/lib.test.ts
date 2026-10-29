@@ -3,10 +3,13 @@ import { getProductById, products } from '../data/products';
 import type { InsuranceProduct } from '../types/product';
 import { applyFilters, filtersFromParams, filtersToParams, type CatalogueFilters } from './catalogue';
 import { buildChecklist } from './checklist';
-import { cellText, compareRows, rowDiffers } from './compare';
+import { cellText, getCompareRows, rowDiffers } from './compare';
 import { formatPremium, formatUgx } from './format';
 import { getMissingFields } from './missing';
+import { createTranslator } from '../i18n/translator';
 
+const t = createTranslator('en');
+const compareRows = getCompareRows(t);
 const base: CatalogueFilters = { query: '', coverFor: null, care: null, category: null, sort: 'name' };
 const product = (id: string): InsuranceProduct => {
   const p = getProductById(id);
@@ -62,7 +65,7 @@ describe('comparison', () => {
     const premiumRow = compareRows.find((r) => r.id === 'premium');
     const exclusionsRow = compareRows.find((r) => r.id === 'exclusions');
     const salaried = product('salaried-comprehensive');
-    expect(cellText(premiumRow!.getCell(salaried))).toBe('Not specified in demonstration data');
+    expect(cellText(premiumRow!.getCell(salaried), t)).toBe('Not specified in demonstration data');
     expect(exclusionsRow!.getCell(salaried).missing).toBe(true);
   });
 
@@ -84,20 +87,20 @@ describe('comparison', () => {
 describe('missing fields', () => {
   it('lists every unspecified field of an incomplete record', () => {
     expect(getMissingFields(product('salaried-comprehensive'))).toEqual(
-      expect.arrayContaining(['Premium (price)', 'Exclusions', 'Eligibility rules', 'Some benefit limit amounts or periods']),
+      expect.arrayContaining(['premium', 'exclusions', 'eligibility', 'limitDetails']),
     );
   });
 
   it('reports a missing coverage area and missing waiting periods', () => {
     expect(getMissingFields(product('vendor-outpatient-plus'))).toEqual(
-      expect.arrayContaining(['Waiting periods', 'Some coverage areas', 'Required documents']),
+      expect.arrayContaining(['waitingPeriods', 'coverageAreas', 'requiredDocuments']),
     );
   });
 });
 
 describe('checklist and formatting', () => {
   it('inserts product-specific steps before the application form step', () => {
-    const items = buildChecklist(product('boda-inpatient-basic'));
+    const items = buildChecklist(product('boda-inpatient-basic'), t);
     const productStep = items.findIndex((i) => i.id === 'product-0');
     const formStep = items.findIndex((i) => i.id === 'get-form');
     expect(productStep).toBeGreaterThan(-1);
@@ -105,11 +108,11 @@ describe('checklist and formatting', () => {
   });
 
   it('builds the standard checklist when a product has no extra steps', () => {
-    expect(buildChecklist(product('salaried-comprehensive'))).toHaveLength(7);
+    expect(buildChecklist(product('salaried-comprehensive'), t)).toHaveLength(7);
   });
 
   it('formats Uganda shillings and missing premiums', () => {
     expect(formatUgx(5_000_000)).toBe('UGX 5,000,000');
-    expect(formatPremium(null)).toBe('Not specified in demonstration data');
+    expect(formatPremium(null, t)).toBe('Not specified in demonstration data');
   });
 });

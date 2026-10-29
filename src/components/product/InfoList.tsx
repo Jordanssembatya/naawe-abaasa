@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useI18n } from '../../i18n/I18nProvider';
 import { NotSpecified } from '../ui/NotSpecified';
 
 interface InfoListProps {
@@ -10,9 +11,10 @@ interface InfoListProps {
 }
 
 /** A list from the product record, or a clear "not specified" message. */
-export function InfoList({ items, icon, emptyText = 'None listed.', missingHint, variant = 'plain' }: InfoListProps) {
+export function InfoList({ items, icon, emptyText, missingHint, variant = 'plain' }: InfoListProps) {
+  const { t } = useI18n();
   if (items === null) return <NotSpecified hint={missingHint} />;
-  if (items.length === 0) return <p className="muted">{emptyText}</p>;
+  if (items.length === 0) return <p className="muted">{emptyText ?? t('common.noneListedSentence')}</p>;
   return (
     <ul className={`info-list info-list--${variant}`}>
       {items.map((item) => (

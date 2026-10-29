@@ -5,12 +5,13 @@ import { CompareStacked, CompareTable } from '../components/compare/CompareTable
 import { CompareToggle } from '../components/product/CompareToggle';
 import { Notice } from '../components/ui/Notice';
 import { PageHeader } from '../components/ui/PageHeader';
-import { getProductById, products } from '../data/products';
+import { useI18n } from '../i18n/I18nProvider';
 import { MAX_COMPARE, useCompare } from '../state/CompareContext';
 import { useMediaQuery } from '../state/useMediaQuery';
 import type { InsuranceProduct } from '../types/product';
 
 function ProductPicker() {
+  const { products } = useI18n();
   return (
     <ul className="picker">
       {products.map((p) => (
@@ -28,17 +29,18 @@ function ProductPicker() {
 
 export function ComparePage() {
   const { ids, add, clear, isFull } = useCompare();
+  const { t, tRich, products, getProduct } = useI18n();
   const [differencesOnly, setDifferencesOnly] = useState(false);
   const isWide = useMediaQuery('(min-width: 768px)', true);
   const addId = useId();
 
-  const items = ids.map(getProductById).filter((p): p is InsuranceProduct => Boolean(p));
+  const items = ids.map(getProduct).filter((p): p is InsuranceProduct => Boolean(p));
   const available = products.filter((p) => !ids.includes(p.id));
 
   return (
     <>
-      <PageHeader eyebrow="Compare plans" title="Compare products side by side">
-        Every product is shown with the same details. Where a detail is not in the record, we say so instead of guessing.
+      <PageHeader eyebrow={t('compare.eyebrow')} title={t('compare.title')}>
+        {t('compare.lead')}
       </PageHeader>
 
       <div className="container page-body">
@@ -47,12 +49,12 @@ export function ComparePage() {
             <span className="icon-tile icon-tile--lg">
               <Scale size={28} aria-hidden />
             </span>
-            <h2 className="empty-state__title">
-              {items.length === 0 ? 'Choose at least two products to compare' : 'Choose one more product'}
-            </h2>
+            <h2 className="empty-state__title">{t(items.length === 0 ? 'compare.chooseTwo' : 'compare.chooseOneMore')}</h2>
             <p>
-              You can compare up to {MAX_COMPARE} products. Add them here or from the{' '}
-              <Link to="/products">product catalogue</Link>.
+              {tRich('compare.upTo', {
+                max: MAX_COMPARE,
+                link: <Link to="/products">{t('compare.catalogueLink')}</Link>,
+              })}
             </p>
             <ProductPicker />
           </div>
@@ -61,17 +63,17 @@ export function ComparePage() {
             <div className="compare-toolbar">
               <Link to="/products" className="button button--ghost button--sm">
                 <ArrowLeft size={16} aria-hidden />
-                Back to catalogue
+                {t('compare.backToCatalogue')}
               </Link>
               <label className="toggle">
                 <input type="checkbox" checked={differencesOnly} onChange={(e) => setDifferencesOnly(e.target.checked)} />
-                <span>Show differences only</span>
+                <span>{t('compare.differencesOnly')}</span>
               </label>
               {!isFull && available.length > 0 && (
                 <div className="compare-toolbar__add">
-                  <label htmlFor={addId} className="visually-hidden">Add a product to the comparison</label>
+                  <label htmlFor={addId} className="visually-hidden">{t('compare.addLabel')}</label>
                   <select id={addId} className="input input--sm" value="" onChange={(e) => e.target.value && add(e.target.value)}>
-                    <option value="">Add a product…</option>
+                    <option value="">{t('compare.addPlaceholder')}</option>
                     {available.map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
@@ -79,15 +81,11 @@ export function ComparePage() {
                 </div>
               )}
               <button type="button" className="button button--ghost button--sm" onClick={clear}>
-                Clear all
+                {t('compare.clearAll')}
               </button>
             </div>
 
-            <Notice tone="info">
-              Rows marked &ldquo;Differs&rdquo; are where the products are not the same. A higher limit or price does
-              not make a product the right choice for you. Think about the care you are most likely to need and what
-              you can afford to pay regularly.
-            </Notice>
+            <Notice tone="info">{t('compare.notice')}</Notice>
 
             {isWide ? (
               <CompareTable items={items} differencesOnly={differencesOnly} />
@@ -96,12 +94,12 @@ export function ComparePage() {
             )}
 
             <div className="compare-next">
-              <h2 className="subheading">Next steps</h2>
+              <h2 className="subheading">{t('compare.nextSteps')}</h2>
               <ul className="compare-next__list">
                 {items.map((p) => (
                   <li key={p.id}>
                     <Link to={`/products/${p.id}/enrol`} className="text-link">
-                      Enrolment guide for {p.name}
+                      {t('compare.guideFor', { name: p.name })}
                     </Link>
                   </li>
                 ))}

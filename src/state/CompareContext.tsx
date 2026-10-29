@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getProductById } from '../data/products';
+import { useI18n } from '../i18n/I18nProvider';
 import { isStringArray, readJson, writeJson } from '../lib/storage';
 import { useToast } from './ToastContext';
 
@@ -24,13 +25,11 @@ function loadIds(): string[] {
   return stored.filter((id) => getProductById(id)).slice(0, MAX_COMPARE);
 }
 
-function nameOf(id: string): string {
-  return getProductById(id)?.name ?? 'Product';
-}
-
 export function CompareProvider({ children }: { children: ReactNode }) {
   const [ids, setIds] = useState<string[]>(loadIds);
   const { notify } = useToast();
+  const { t } = useI18n();
+  const nameOf = useCallback((id: string) => getProductById(id)?.name ?? t('common.otherProduct'), [t]);
 
   useEffect(() => writeJson(STORAGE_KEY, ids), [ids]);
 
@@ -38,41 +37,37 @@ export function CompareProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       if (ids.includes(id)) return;
       if (ids.length >= MAX_COMPARE) {
-        notify(`You can compare up to ${MAX_COMPARE} products. Remove one first.`, 'warning');
+        notify(t('compare.toast.full', { max: MAX_COMPARE }), 'warning');
         return;
       }
       setIds([...ids, id]);
-      notify(
-        ids.length === 0
-          ? `${nameOf(id)} added. Add one more product to compare.`
-          : `${nameOf(id)} added to comparison.`,
-      );
+      notify(t(ids.length === 0 ? 'compare.toast.addedFirst' : 'compare.toast.added', { name: nameOf(id) }));
     },
-    [ids, notify],
+    [ids, notify, t, nameOf],
   );
 
   const remove = useCallback(
     (id: string) => {
       if (!ids.includes(id)) return;
       setIds(ids.filter((x) => x !== id));
-      notify(`${nameOf(id)} removed from comparison.`);
+      notify(t('compare.toast.removed', { name: nameOf(id) }));
     },
-    [ids, notify],
+    [ids, notify, t, nameOf],
   );
 
   const replace = useCallback(
     (oldId: string, newId: string) => {
       if (oldId === newId || ids.includes(newId)) return;
       setIds(ids.map((x) => (x === oldId ? newId : x)));
-      notify(`Replaced ${nameOf(oldId)} with ${nameOf(newId)}.`);
+      notify(t('compare.toast.replaced', { old: nameOf(oldId), new: nameOf(newId) }));
     },
-    [ids, notify],
+    [ids, notify, t, nameOf],
   );
 
   const clear = useCallback(() => {
     setIds([]);
-    notify('Comparison cleared.');
-  }, [notify]);
+    notify(t('compare.toast.cleared'));
+  }, [notify, t]);
 
   const value = useMemo(
     () => ({

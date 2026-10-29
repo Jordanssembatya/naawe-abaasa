@@ -1,13 +1,16 @@
 import { ChevronLeft, Info, Scale } from 'lucide-react';
 import { Link, NavLink, useLocation, useMatches, useNavigate } from 'react-router';
+import { useI18n } from '../../i18n/I18nProvider';
+import type { MessageKey } from '../../i18n/translator';
 import { appBarFor } from '../../lib/appBar';
 import { useCompare } from '../../state/CompareContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { Logo } from './Logo';
 
-const navItems = [
-  { to: '/products', label: 'Products' },
-  { to: '/glossary', label: 'Glossary' },
-  { to: '/about', label: 'About the data' },
+const navItems: { to: string; label: MessageKey }[] = [
+  { to: '/products', label: 'nav.products' },
+  { to: '/glossary', label: 'nav.glossary' },
+  { to: '/about', label: 'nav.aboutData' },
 ];
 
 /**
@@ -17,11 +20,12 @@ const navItems = [
  */
 export function Header() {
   const { ids } = useCompare();
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const appBar = appBarFor(useMatches());
 
-  const compareLabel = `Compare${ids.length ? ` (${ids.length})` : ''}`;
+  const compareLabel = ids.length ? t('nav.compareCount', { count: ids.length }) : t('nav.compare');
 
   const goBack = () => {
     if (!appBar) return;
@@ -36,21 +40,21 @@ export function Header() {
       <div className="container site-header__inner">
         {appBar && (
           <div className="app-bar__lead">
-            <button type="button" className="icon-button app-bar__back" onClick={goBack} aria-label="Back">
+            <button type="button" className="icon-button app-bar__back" onClick={goBack} aria-label={t('common.back')}>
               <ChevronLeft size={24} aria-hidden />
             </button>
-            <span className="app-bar__title">{appBar.title}</span>
+            <span className="app-bar__title">{t(appBar.title)}</span>
           </div>
         )}
 
-        <Link to="/" className="site-header__brand" aria-label="AfyaGuide Uganda home">
+        <Link to="/" className="site-header__brand" aria-label={t('brand.home')}>
           <Logo />
         </Link>
 
-        <nav className="site-nav" aria-label="Main">
+        <nav className="site-nav" aria-label={t('nav.main')}>
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className="site-nav__link">
-              {item.label}
+              {t(item.label)}
             </NavLink>
           ))}
           <NavLink to="/compare" className="site-nav__link site-nav__compare">
@@ -60,11 +64,12 @@ export function Header() {
         </nav>
 
         <div className="site-header__actions">
+          <LanguageSwitcher />
           <Link to="/products" className="button button--primary button--sm site-header__cta">
-            Explore insurance
+            {t('nav.exploreInsurance')}
           </Link>
           {location.pathname !== '/about' && (
-            <Link to="/about" className="icon-button app-bar__about" aria-label="About this prototype">
+            <Link to="/about" className="icon-button app-bar__about" aria-label={t('nav.aboutPrototype')}>
               <Info size={20} aria-hidden />
             </Link>
           )}
