@@ -12,6 +12,7 @@ import {
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Term } from '../components/glossary/Term';
+import { InstallCard } from '../components/layout/InstallCard';
 import { ProductCard } from '../components/product/ProductCard';
 import { SectionHeader } from '../components/ui/SectionHeader';
 import { customerCategoryLabels } from '../data/labels';
@@ -118,6 +119,10 @@ export function HomePage() {
         </div>
       </section>
 
+      <div className="container">
+        <InstallCard />
+      </div>
+
       <section className="section section--muted" aria-labelledby="how-title">
         <div className="container">
           <SectionHeader eyebrow="How it works" title="Three steps to a clearer choice" id="how-title">
@@ -206,7 +211,8 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="band" aria-labelledby="band-title">
+      {/* The band and the closing call to action repeat the tab bar's destinations, so phones skip them. */}
+      <section className="band desktop-only" aria-labelledby="band-title">
         <div className="container band__inner">
           <SectionHeader eyebrow="Designed for" title="Find cover that fits how you work" id="band-title" inverted />
           <div className="band__chips">
@@ -246,7 +252,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="section section--tight">
+      <section className="section section--tight desktop-only">
         <div className="container">
           <div className="cta-panel">
             <h2 className="cta-panel__title">Ready to compare your options?</h2>

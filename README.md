@@ -32,6 +32,8 @@ npm run test:e2e     # browser tests at 360/390/768/1280px (builds and serves au
 | About (`/about`) | Purpose, demo vs verified data, terms can change, how to verify, no affiliation |
 | Feedback | Toast messages for adding, removing and replacing comparison products; a comparison tray on browsing pages |
 | Errors | Not-found page for unknown routes and products; route error boundary |
+| Mobile app (PWA) | Installable from the browser: "Install app" card on Home (Chrome/Edge), Share → Add to Home Screen steps on iPhone/iPad. Opens full-screen with its own icon, with Products, Compare and Glossary shortcuts on a long press. Works offline after the first visit (the whole app and its data are cached by a service worker), with an "offline" notice |
+| App-style UI (under 1024px) | Bottom tab bar (Home, Products, Compare with a count, Glossary); app bar with Back and the page title on inner pages (Back goes up to the parent page when opened from a link); compact home screen; safe-area spacing for notched phones. Desktop keeps the website layout |
 
 ## Architecture
 
@@ -77,18 +79,18 @@ AfyaGuide's own name, logo and content are used throughout. Nothing was copied f
 | --- | --- |
 | `npm run build` (`tsc -b` + `vite build`) | Passed, no type errors |
 | `npm run lint` | Passed, 0 problems |
-| `npm test` | 19/19 passed: data rules, filtering, sorting, URL round-trip, comparison "not specified" and differences, missing-field detection, checklist, formatting, plus a full journey integration test, empty states, unknown product, glossary search |
-| `npm run test:e2e` | 6/6 passed in Chromium |
+| `npm test` | 23/23 passed: data rules, filtering, sorting, URL round-trip, comparison "not specified" and differences, missing-field detection, checklist, formatting, plus a full journey integration test, empty states, unknown product, glossary search, and the app shell (tab bar, Back in-app and from a direct link, Compare count) |
+| `npm run test:e2e` | 7/7 passed in Chromium, including the PWA test: valid manifest, and a never-visited page loading offline |
 
 The browser tests cover:
 
 - **Layout:** no horizontal overflow and no console errors on 7 pages at 360, 390, 768 and 1280px.
 - **Mobile journey at 360px:**
-  1. Open and use the mobile menu.
+  1. Move between tabs with the bottom tab bar.
   2. Find a product with filter chips.
   3. Open its details, including the missing-information warning, exclusions and a limit.
   4. Open a term popover, check it stays on screen, and close it by tapping outside.
-  5. Add products to the comparison, and check that Back restores the filters.
+  5. Add products to the comparison, and check that the app bar's Back restores the filters.
   6. Check the stacked comparison shows the same fields for both products.
   7. Replace a product, then remove one.
   8. Tick checklist steps and check the ticks persist after a reload.
@@ -101,7 +103,7 @@ The layout was also checked visually from screenshots at each width.
 
 - **No real product data.** All records are fictional, so the verified-contact path is built and typed but not shown with real data.
 - **English only.** There is no Luganda or Swahili yet.
-- **No offline support.** There is no service worker or PWA install.
+- **PWA only, not a store app.** It installs from the browser; there is no Play Store or App Store build. The service worker runs in `npm run build` / `npm run preview` and on the deployed site, not in `npm run dev`. Installing needs HTTPS (or localhost).
 - **No screen-reader audit.** No automated axe check or manual NVDA/TalkBack session has been done. Semantics, labels, focus states and keyboard paths were built in and the keyboard paths tested.
 - **Chromium only.** Browser tests ran in Chromium; Firefox and Safari were not tested.
 

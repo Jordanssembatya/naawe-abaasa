@@ -40,14 +40,15 @@ test('mobile journey: discover, understand, compare, prepare to enrol', async ({
   await page.setViewportSize({ width: 360, height: 760 });
   const errors = watchErrors(page);
 
-  // Home, mobile menu works.
+  // Home: the bottom tab bar is the navigation, and the desktop nav is hidden.
   await page.goto('/');
-  await page.getByRole('button', { name: 'Open menu' }).click();
-  await expect(page.locator('#mobile-menu')).toBeVisible();
-  await page.locator('#mobile-menu').getByRole('link', { name: 'Glossary' }).click();
+  const tabs = page.getByRole('navigation', { name: 'Main' });
+  await expect(tabs).toHaveCount(1);
+  await tabs.getByRole('link', { name: 'Glossary' }).click();
   await expect(page).toHaveURL(/\/glossary$/);
-  await expect(page.locator('#mobile-menu')).toHaveCount(0);
-  await page.goto('/');
+  await expect(tabs.getByRole('link', { name: 'Glossary' })).toHaveClass(/active/);
+  await tabs.getByRole('link', { name: 'Home' }).click();
+  await expect(page).toHaveURL(/\/$/);
 
   // Find a product with a filter chip.
   await page.getByRole('link', { name: 'Market vendors' }).first().click();
@@ -76,7 +77,7 @@ test('mobile journey: discover, understand, compare, prepare to enrol', async ({
   // Compare two products.
   await page.getByRole('button', { name: 'Add Vendor Outpatient Plus to comparison' }).click();
   await expect(page.getByText('1 of 3 selected')).toBeVisible();
-  await page.goBack();
+  await page.getByRole('button', { name: 'Back' }).click(); // the app bar's Back
   await expect(page.getByText('1 of 4 products match')).toBeVisible(); // filters restored by Back
   await page.getByRole('button', { name: 'Clear search and filters' }).first().click();
   await page.getByRole('button', { name: 'Add Salaried Comprehensive to comparison' }).click();
@@ -106,6 +107,30 @@ test('mobile journey: discover, understand, compare, prepare to enrol', async ({
   await expect(page.locator('a[href^="tel:"], a[href^="mailto:"]')).toHaveCount(0);
 
   expect(errors).toEqual([]);
+});
+
+test('installable app: manifest, and every page works offline after the first visit', async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto('/');
+
+  const manifest = await (await page.request.get('/manifest.webmanifest')).json();
+  expect(manifest).toMatchObject({ name: 'AfyaGuide Uganda', display: 'standalone', start_url: '/' });
+
+  // Wait until the service worker controls the page, so the app is cached.
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) {
+      await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+    }
+  });
+
+  await context.setOffline(true);
+  await page.goto('/products/family-starter'); // never visited, still loads
+  await expect(page.getByRole('heading', { level: 1, name: 'Family Starter Cover' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'You are offline' })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Glossary' }).click();
+  await expect(page.getByRole('searchbox', { name: /search the glossary/i })).toBeVisible();
+  await context.setOffline(false);
 });
 
 test('keyboard: term popover opens with Enter and closes with Escape', async ({ page }) => {
